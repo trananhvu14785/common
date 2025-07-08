@@ -1,0 +1,13 @@
+package com.kane.common.dto.request;
+
+import lombok.*;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor
+public class SignInRequest {
+    private String username;
+    private String password;
+}
