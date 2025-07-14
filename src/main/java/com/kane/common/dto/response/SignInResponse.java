@@ -1,8 +1,7 @@
 package com.kane.common.dto.response;
 
-import lombok.*;
-
 import java.util.Date;
+import lombok.*;
 
 @Getter
 @Setter
