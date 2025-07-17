@@ -43,4 +43,11 @@ public class GlobalExceptionHandler {
     return ErrorResponse.of(
         exception.getErrorCode(), exception.getDomain(), exception.getMessage());
   }
+
+  @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+  @ExceptionHandler(AuthException.class)
+  public ErrorResponse handle(final AuthException exception) {
+    return ErrorResponse.of(
+        exception.getErrorCode(), exception.getDomain(), exception.getMessage());
+  }
 }

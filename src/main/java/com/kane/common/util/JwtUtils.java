@@ -3,10 +3,9 @@ package com.kane.common.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,11 +20,14 @@ public class JwtUtils {
   private final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
 
   private SecretKey getSigningKey() {
-    return Keys.hmacShaKeyFor(secret.getBytes());
+    byte[] keyBytes = Base64.getDecoder().decode(secret);
+    return Keys.hmacShaKeyFor(keyBytes);
   }
 
-  public String generateToken(String username) {
+  public String generateToken(String username, List<String> roles) {
     Map<String, Object> claims = new HashMap<>();
+    claims.put(
+        "authorities", roles.stream().map(role -> "ROLE_" + role).collect(Collectors.toList()));
     return generateToken(username, claims);
   }
 
@@ -53,7 +55,7 @@ public class JwtUtils {
     return claimsResolver.apply(claims);
   }
 
-  private Claims extractAllClaims(String token) {
+  public Claims extractAllClaims(String token) {
     return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
   }
 

@@ -8,6 +8,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 public class SignInRequest {
+  private String clientId;
+  private String clientSecret;
   private String username;
   private String password;
 }

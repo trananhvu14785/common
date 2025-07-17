@@ -1,14 +1,19 @@
 package com.kane.common.config;
 
 import com.kane.common.util.JwtUtils;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -44,9 +49,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       if (jwtUtil.validateToken(jwt, username)) {
+        Claims claims = jwtUtil.extractAllClaims(jwt);
+
+        List<String> roles = (List<String>) claims.get("authorities");
+        List<GrantedAuthority> authorities =
+            roles != null
+                ? roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                : List.of();
+
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                username, null, null); // Có thể thêm authorities nếu cần phân quyền
+            new UsernamePasswordAuthenticationToken(username, null, authorities);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
