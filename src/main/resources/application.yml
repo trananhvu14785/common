@@ -1,3 +1,7 @@
 spring:
     application:
         name: common
+jwt:
+    secret: 4An32HWrMUxVr0TH6ZrV6p+g/cT8KCwz34w7h7FdTc6h8mbIvAygs5DcfeiDtqFKm84/t4OeifghoVCBuymmtQ==
+    expiration-time: 36000000
+    refresh-token-expiration: 86400000

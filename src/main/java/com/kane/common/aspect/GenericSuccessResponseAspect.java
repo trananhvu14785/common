@@ -26,11 +26,11 @@ public class GenericSuccessResponseAspect {
     if (result instanceof ResponseEntity<?> responseEntity) {
       Object body = responseEntity.getBody();
 
-      if (body instanceof GenericSuccessResponseData<?>) {
+      if (body instanceof GenericSuccessResponseData) {
         return result;
       }
 
-      GenericSuccessResponseData<?> wrapped =
+      GenericSuccessResponseData wrapped =
           GenericSuccessResponseData.builder()
               .statusCode(responseEntity.getStatusCode().value())
               .statusMessage(HttpStatus.OK.name())

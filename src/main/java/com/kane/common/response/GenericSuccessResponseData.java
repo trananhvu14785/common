@@ -8,11 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GenericSuccessResponseData<T> {
+public class GenericSuccessResponseData {
   private int statusCode;
   private String statusMessage;
   private String cufxMessage;
   private Date timestamp;
-  private long timeElapsedInMS;
-  private T data;
+  private Long timeElapsedInMS;
+  private Object data;
 }

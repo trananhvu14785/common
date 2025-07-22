@@ -4,16 +4,20 @@ import com.kane.common.exception.*;
 import com.kane.common.exception.IllegalArgumentException;
 import com.kane.common.response.ErrorResponse;
 import com.kane.common.response.GenericSuccessResponseData;
+import jakarta.validation.ConstraintViolation;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice // có tác dụng xử lý các exception toàn cục
-@ControllerAdvice
+@RestControllerAdvice // handles exceptions for all @RestController
+@ControllerAdvice // can be used for both @Controller and @RestController
 public class GlobalExceptionHandler {
   @ResponseStatus(value = HttpStatus.CONFLICT)
   @ExceptionHandler(exception = {UserAlreadyExitsException.class})
@@ -57,34 +61,54 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedCustomException.class)
-  public ResponseEntity<GenericSuccessResponseData<Void>> handlerAccessDeniedCustomException(
+  public ResponseEntity<GenericSuccessResponseData> handlerAccessDeniedCustomException(
       AccessDeniedCustomException exception) {
-    GenericSuccessResponseData<Void> response =
-        GenericSuccessResponseData.<Void>builder()
+    GenericSuccessResponseData response =
+        GenericSuccessResponseData.builder()
             .statusCode(HttpStatus.FORBIDDEN.value())
             .statusMessage(HttpStatus.FORBIDDEN.getReasonPhrase())
             .cufxMessage(exception.getMessage())
             .timestamp(new Date())
-            .timeElapsedInMS(0)
+            .timeElapsedInMS(0L)
             .data(null)
             .build();
 
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
-  @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<GenericSuccessResponseData<Void>> handleRuntimeException(
-      RuntimeException ex) {
-    GenericSuccessResponseData<Void> response =
-        GenericSuccessResponseData.<Void>builder()
-            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .statusMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-            .cufxMessage(ex.getMessage())
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<GenericSuccessResponseData> handleValidationException(
+      MethodArgumentNotValidException ex) {
+    long start = System.currentTimeMillis();
+
+    Map<String, String> errors = new HashMap<>();
+
+    ex.getBindingResult()
+        .getFieldErrors()
+        .forEach(
+            error -> {
+              String fieldPath = error.getField();
+
+              if (error.contains(ConstraintViolation.class)) {
+                fieldPath =
+                    ((ConstraintViolation<?>) error.unwrap(ConstraintViolation.class))
+                        .getPropertyPath()
+                        .toString();
+              }
+
+              errors.put(fieldPath, error.getDefaultMessage());
+            });
+
+    GenericSuccessResponseData response =
+        GenericSuccessResponseData.builder()
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .statusMessage(HttpStatus.BAD_REQUEST.getReasonPhrase())
+            .cufxMessage("Validation failed")
             .timestamp(new Date())
-            .timeElapsedInMS(0)
-            .data(null)
+            .timeElapsedInMS(System.currentTimeMillis() - start)
+            .data(errors)
             .build();
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    return ResponseEntity.badRequest().body(response);
   }
 }

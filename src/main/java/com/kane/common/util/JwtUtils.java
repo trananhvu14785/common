@@ -16,8 +16,11 @@ public class JwtUtils {
   @Value("${jwt.secret}")
   private String secret;
 
-  private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
-  private final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
+  @Value("${jwt.expiration-time}")
+  private long EXPIRATION_TIME;
+
+  @Value("${jwt.refresh-token-expiration}")
+  private long REFRESH_TOKEN_EXPIRATION;
 
   private SecretKey getSigningKey() {
     byte[] keyBytes = Base64.getDecoder().decode(secret);
