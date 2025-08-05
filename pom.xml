@@ -129,6 +129,7 @@
                         <googleJavaFormat>
                             <version>1.17.0</version>
                         </googleJavaFormat>
+                        <removeUnusedImports />
                     </java>
                 </configuration>
             </plugin>

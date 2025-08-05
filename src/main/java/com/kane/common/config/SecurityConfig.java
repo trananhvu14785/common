@@ -36,6 +36,9 @@ public class SecurityConfig {
     "/email/**",
     "/customer/email",
     "/auth/auth",
+    "/origination/applicant/create-applicant",
+    "/customer/get-customerUud",
+    "/customer/get-customerUud/{email}",
   };
 
   private final JwtRequestFilter jwtRequestFilter;
