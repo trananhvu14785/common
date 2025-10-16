@@ -33,7 +33,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     if (requestURI.endsWith("/auth/signIn")
         || requestURI.endsWith("/auth/signUp")
         || requestURI.endsWith("/auth/refreshToken")
-        || requestURI.endsWith("/auth/hello")) {
+        || requestURI.endsWith("/auth/hello")
+        || requestURI.endsWith("/messages/event")) {
       chain.doFilter(request, response);
       return;
     }
